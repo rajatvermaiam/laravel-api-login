@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Core\Response;
 use App\Notifications\PasswordResetRequest;
-use App\Notifications\VerifyApiEmail;
 use App\PasswordReset;
 use App\User;
 use Carbon\Carbon;
@@ -21,6 +20,11 @@ class AuthController extends Controller
 {
     use VerifiesEmails, Notifiable;
 
+    public function __construct()
+    {
+        $this->middleware('throttle:6,1')->only('verify', 'resend');
+    }
+
     public function login(Request $request)
     {
 
@@ -34,8 +38,10 @@ class AuthController extends Controller
 
         if (auth()->attempt([
             'email' => $request->email,
-            'password' => $request->password
+            'password' => $request->password,
         ])) {
+            if (is_null($request->user()->email_verified_at))
+                return response()->json(Response::getErrorMessage("First activate your account", array(), 422), 422);
             $data['user'] = $user = $request->user();
             $data['token'] = auth()->user()->createToken('login')->accessToken;
             return response()->json(Response::getSuccessMessage("Successfully logged In", $data, 200), 200);
@@ -54,14 +60,12 @@ class AuthController extends Controller
         if ($validator->fails())
             return response()->json(Response::getErrorMessage(collect($validator->messages())->first()[0], array(), 422), 422);
 
-
         $user = User::create([
             'name' => $request['name'],
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
         ]);
-        $this->notify(new VerifyApiEmail($user));
-
+        $user->sendApiEmailVerificationNotification();
         return response()->json(Response::getSuccessMessage("Check Inbox to activate account", array(), 200), 200);
     }
 
@@ -80,9 +84,9 @@ class AuthController extends Controller
         $user = User::findOrFail($userID);
         $user->email_verified_at = Carbon::now();
         $user->save();
+        //apply different response here
         return response()->json(Response::getSuccessMessage("Email verified!", array(), 200), 200);
     }
-
 
     public function resetPassword(Request $request)
     {
@@ -137,11 +141,11 @@ class AuthController extends Controller
             ['email', $request->email]
         ])->first();
         if (!$passwordReset)
-        return response()->json(Response::getErrorMessage("This password reset token is invalid.", array(), 422), 422);
+            return response()->json(Response::getErrorMessage("This password reset token is invalid.", array(), 422), 422);
 
         $user = User::where('email', $passwordReset->email)->first();
         if (!$user)
-        return response()->json(Response::getErrorMessage("We can't find a user with that e-mail address.", array(), 422), 422);
+            return response()->json(Response::getErrorMessage("We can't find a user with that e-mail address.", array(), 422), 422);
 
         $user->password = bcrypt($request->password);
         $user->save();
