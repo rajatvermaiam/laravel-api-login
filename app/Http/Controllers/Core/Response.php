@@ -12,7 +12,8 @@ class Response
     public $data;
     public $httpStatusCode;
 
-    public function __construct($status, $message, $type, $data,$statusCode=200){
+    public function __construct($status, $message, $type, $data, $statusCode = 200)
+    {
         $this->setStatus($status);
         $this->setMessage($message);
         $this->setType($type);
@@ -23,6 +24,43 @@ class Response
 
     // getters and setters
 
+    public static function getNotExistMessage($message, $data, $statusCode = 404)
+    {
+        return new self(false, $message, 'error', $data, $statusCode);
+    }
+
+    public static function getCustomerResponse($message, $data, $statusCode)
+    {
+        return new self(false, $message, 'error', $data, $statusCode);
+    }
+
+    public static function getErrorMessage($message, $data, $statusCode = 200)
+    {
+        return new self(false, $message, 'error', $data, $statusCode);
+    }
+
+    public static function getSuccessMessage($message, $data, $statusCode = 200)
+    {
+        return new self(true, $message, 'success', $data, $statusCode);
+    }
+
+    public static function getInfoMessage($message, $data, $statusCode = 200)
+    {
+        return new self(true, $message, 'info', $data, $statusCode);
+    }
+
+    public static function getWarningMessage($message, $data, $statusCode = 200)
+    {
+        return new self(false, $message, 'warning', $data, $statusCode);
+    }
+
+    public static function fileUpload($file)
+    {
+        $name = md5(microtime()) . '.' . $file->getClientOriginalExtension();
+        $status = $file->move('uploads', $name);
+        return $name;
+    }
+
     /**
      * @return mixed
      */
@@ -30,6 +68,8 @@ class Response
     {
         return $this->status;
     }
+
+    // custom functions
 
     /**
      * @param mixed $status
@@ -87,32 +127,6 @@ class Response
         $this->data = $data;
     }
 
-    // custom functions
-    public static function getNotExistMessage($message, $data, $statusCode=404){
-        return new self(false, $message, 'error', $data,$statusCode);
-    }
-
-    public  static function getCustomerResponse($message,$data,$statusCode)
-    {
-        return new self(false, $message, 'error', $data,$statusCode);
-    }
-
-    public static function getErrorMessage($message, $data, $statusCode=200){
-        return new self(false, $message, 'error', $data,$statusCode);
-    }
-
-    public static function getSuccessMessage($message, $data, $statusCode=200){
-        return new self(true, $message, 'success', $data,$statusCode);
-    }
-
-    public static function getInfoMessage($message, $data, $statusCode=200){
-        return new self(true, $message, 'info', $data,$statusCode);
-    }
-
-    public static function getWarningMessage($message, $data, $statusCode=200){
-        return new self(false, $message, 'warning', $data,$statusCode);
-    }
-
     /**
      * @return mixed
      */
@@ -128,8 +142,6 @@ class Response
     {
         $this->httpStatusCode = $httpStatusCode;
     }
-
-
 
 
 }
