@@ -16,5 +16,7 @@ Route::get('/', function () {
 });
 
 Auth::routes(['verify' => true]);
+Route::get('login/{provider}', 'Auth\SocialiteController@redirectToProvider');
+Route::get('login/{provider}/callback', 'Auth\SocialiteController@handleProviderCallback');
 
 Route::get('/home', 'HomeController@index')->name('home');

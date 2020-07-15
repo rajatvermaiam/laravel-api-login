@@ -30,4 +30,30 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'facebook' => [
+        'client_id' => env('FACEBOOK_APP_ID'),
+        'client_secret' => env('FACEBOOK_APP_SECRET'),
+        'redirect' => env('APP_URL') . '/login/facebook/callback',
+    ],
+    'github' => [
+        'client_id' => env('GITHUB_APP_ID'),
+        'client_secret' => env('GITHUB_APP_SECRET'),
+        'redirect' => env('APP_URL') . '/login/github/callback',
+    ],
+    'twitter' => [
+        'client_id' => env('TWITTER_APP_ID'),
+        'client_secret' => env('TWITTER_APP_SECRET'),
+        'redirect' => env('APP_URL') . '/login/twitter/callback',
+    ],
+    'linkedin' => [
+        'client_id' => env('LINKEDIN_APP_ID'),
+        'client_secret' => env('LINKEDIN_APP_SECRET'),
+        'redirect' => env('APP_URL') . '/login/linkedin/callback',
+    ],
+    'google' => [
+        'client_id' => env('GOOGLE_APP_ID'),
+        'client_secret' => env('GOOGLE_APP_SECRET'),
+        'redirect' => env('APP_URL') . '/login/google/callback',
+    ],
+
 ];
